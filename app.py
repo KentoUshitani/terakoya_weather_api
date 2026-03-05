@@ -3,8 +3,8 @@ import requests
 import pandas as pd
 import matplotlib.pyplot as plt
 import japanize_matplotlib
-import os  # 追加
-from dotenv import load_dotenv  # 追加
+import os
+from dotenv import load_dotenv
 
 # .env ファイルから環境変数を読み込む
 load_dotenv()
@@ -17,7 +17,7 @@ def show_weather_card(weather_json, city_name):
         # OpenWeatherMapのJSONから現在のデータを抽出
         current = weather_json["list"][0]
         temp = round(current["main"]["temp"], 1) # 気温(℃)を小数第1位に丸める
-        desc = current["weather"][0]["description"] # 天気の状態（晴れ、小雨など）
+        desc = current["weather"][0]["description"] # 天気の状態
         icon_code = current["weather"][0]["icon"]
 
         # アイコンと背景色の判定
@@ -63,4 +63,51 @@ def show_weather_card(weather_json, city_name):
 # メイン処理 (画面の組み立てとAPI通信)
 # ==========================================
 def main():
-    st.set_page_config(page_title="Weather App", page_icon
+    st.set_page_config(page_title="Weather App", page_icon="🌤️")
+    st.title("🌤️ 天気予報アプリハンズオン")
+    
+    # 検索窓
+    city = st.text_input("都市名を入力してください（日本語OK）", "東京都")
+
+    if st.button("天気を調べる"):
+        
+        # 1. 接続先URL
+        url = "https://api.openweathermap.org/data/2.5/forecast"
+
+        # 2. 環境変数からAPIキーを取得
+        api_key = os.getenv("OPENWEATHER_API_KEY")
+
+        if not api_key:
+            st.error(".env ファイルに OPENWEATHER_API_KEY が設定されていません。")
+            return
+
+        # パラメータの設定
+        params = {
+            "q": city,
+            "appid": api_key,
+            "units": "metric",
+            "lang": "ja"
+        }
+
+        # 3. データ取得
+        res = requests.get(url, params=params)
+
+        # 結果の判定と表示
+        if res.status_code == 200:
+            data = res.json()
+            actual_city_name = data["city"]["name"]
+            st.success(f"発見: {actual_city_name} のデータを取得しました！")
+            # 修正ポイント: 閉じカッコを補完しました
+            show_weather_card(data, actual_city_name)
+            
+        elif res.status_code == 401:
+            st.error("エラー (401): APIキーが無効、または有効化待ちです。")
+            
+        elif res.status_code == 404:
+            st.error("エラー (404): その都市は見つかりませんでした。別の書き方を試してください。")
+            
+        else:
+            st.error(f"通信エラーが発生しました (コード: {res.status_code})。")
+
+if __name__ == "__main__":
+    main()
