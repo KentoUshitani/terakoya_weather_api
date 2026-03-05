@@ -3,6 +3,11 @@ import requests
 import pandas as pd
 import matplotlib.pyplot as plt
 import japanize_matplotlib
+import os  # 追加
+from dotenv import load_dotenv  # 追加
+
+# .env ファイルから環境変数を読み込む
+load_dotenv()
 
 # ==========================================
 # 関数: 取得したデータから画面（カードとグラフ）を描画する
@@ -58,52 +63,4 @@ def show_weather_card(weather_json, city_name):
 # メイン処理 (画面の組み立てとAPI通信)
 # ==========================================
 def main():
-    st.set_page_config(page_title="Weather App", page_icon="🌤️")
-    st.title("🌤️ 天気予報アプリハンズオン")
-    
-    # 検索窓（日本語OKに改修済み）
-    city = st.text_input("都市名を入力してください（日本語OK）", "東京都")
-
-    if st.button("天気を調べる"):
-        
-        # ------------------------------------------------
-        # 【演習】 ここから下を埋めてください
-        # ------------------------------------------------
-
-        # 1. 接続先URL（OpenWeatherMapのForecast API）
-        url = "https://api.openweathermap.org/data/2.5/forecast"
-
-        # 2. 必要なデータ（パラメータ）
-        params = {
-            "q": city,                               # 画面で入力された都市名
-            "appid": "825981f2188a1991a384342c63af4bf8", # 認証用APIキー
-            "units": "metric",                       # 単位を摂氏(℃)にする
-            "lang": "ja"                             # 日本語でデータを取得
-        }
-
-        # 3. データ取得（リクエスト送信）
-        res = requests.get(url, params=params)
-
-        # ------------------------------------------------
-        # 【演習】 ここまで
-        # ------------------------------------------------
-
-        # 結果の判定と表示
-        if res.status_code == 200:
-            data = res.json()
-            # APIが認識した正式な都市名を取得（例：「東京」→「Tokyo」など）
-            actual_city_name = data["city"]["name"]
-            st.success(f"発見: {actual_city_name} のデータを取得しました！")
-            show_weather_card(data, actual_city_name)
-            
-        elif res.status_code == 401:
-            st.error("エラー (401): APIキーが無効、または有効化待ちです（発行後10〜15分かかります）。")
-            
-        elif res.status_code == 404:
-            st.error("エラー (404): その都市は見つかりませんでした。別の書き方（例：横浜市、Yokohama）を試してください。")
-            
-        else:
-            st.error(f"通信エラーが発生しました (コード: {res.status_code})。")
-
-if __name__ == "__main__":
-    main()
+    st.set_page_config(page_title="Weather App", page_icon
